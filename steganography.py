@@ -28,6 +28,7 @@ def encrypt_decrypt(string,password,mode='enc'):
     else:
         return cipher.decrypt(string.encode()).decode()
 
+#Encodes secret data in image
 def encode(input_filepath,text,output_filepath,password=None):
     if password != None:
         data = encrypt_decrypt(text,password,'enc') #If password is provided, encrypt the data with given password
@@ -73,7 +74,7 @@ def encode(input_filepath,text,output_filepath,password=None):
     loss_percentage = (modified_bits/encoding_capacity)*100 #calculate how many bits of the original image are changed in order to encode the secret message and calculate the percentage of data loss from it
     return loss_percentage
 
-
+#Extracts secret data from input image
 def decode(input_filepath,password=None):
         result,extracted_bits,completed,number_of_bits = '',0,False,None
         img = imread(input_filepath) #open the image
