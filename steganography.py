@@ -71,3 +71,36 @@ def encode(input_filepath,text,output_filepath,password=None):
         raise FileError("Failed to write image '{}'".format(output_filepath))
     loss_percentage = (modified_bits/encoding_capacity)*100 #calculate how many bits of the original image are changed in order to encode the secret message and calculate the percentage of data loss from it
     return loss_percentage
+
+
+    def decode(input_filepath,password=None):
+        result,extracted_bits,completed,number_of_bits = '',0,False,None
+    img = imread(input_filepath) #open the image
+    if img is None:
+        raise FileError("The image file '{}' is inaccessible".format(input_filepath)) #if failed to open image, raise exception
+    height,width = img.shape[0],img.shape[1] #get the dimensions of the image
+    #Run 2 nested for loops to traverse all the pixels of the whole image in left to right, top to bottom fashion
+    for i in range(height):
+        for j in range(width):
+            for k in img[i,j]: #for values in pixel RGB tuple
+                result += str(k%2) #extract the LSB of RGB values of each pixel
+                extracted_bits += 1
+
+                if extracted_bits == 32 and number_of_bits == None: #If the first 32 bits are extracted, it is our data size. Now extract the original data
+                    number_of_bits = int(result,2)*8 #number of bits to extract from the image
+                    result = ''
+                    extracted_bits = 0
+                elif extracted_bits == number_of_bits: #if all required bits are extracted, mark the process as completed
+                    completed = True
+                    break
+            if completed:
+                break
+        if completed:
+            break
+    if password == None: #if the data doesn't need password to be unlocked, return the string representation of binary data
+        return bin2str(result)
+    else: #else, try to decrypt the data with the given password and then return the decrypted text
+        try:
+            return encrypt_decrypt(bin2str(result),password,'dec')
+        except:
+            raise PasswordError("Invalid password!") #if password did not match, raise PasswordError exception
